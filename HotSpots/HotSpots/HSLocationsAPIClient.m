@@ -50,7 +50,8 @@ static NSString *APIKey = @"";
 
         NSMutableArray *locations = [NSMutableArray array];
         for (NSDictionary *locationInfo in responseObject[@"results"]) {
-            [locations addObject:[[HSLocation alloc] initWithAttributes:locationInfo]];
+            HSLocation *location = [[HSLocation alloc] initWithAttributes:locationInfo];
+            [locations addObject:location];
         }
         
         completion(@{@"results" : locations, @"next_page_token" : responseObject[@"next_page_token"]}, nil);
