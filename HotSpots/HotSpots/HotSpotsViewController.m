@@ -17,7 +17,7 @@ static NSString *CellIdentifier = @"Cell";
 
 @property (nonatomic) NSArray *locations;
 @property (nonatomic) HSLocationsService *locationService;
-@property (nonatomic) NSMutableDictionary *locationByIndex;
+@property (nonatomic) NSMutableDictionary *locationIdentifierByIndex;
 
 @end
 
@@ -28,7 +28,7 @@ static NSString *CellIdentifier = @"Cell";
     self = [super initWithStyle:style];
     if (self) {
         _locationService = [HSLocationsService new];
-        _locationByIndex = [NSMutableDictionary dictionary];
+        _locationIdentifierByIndex = [NSMutableDictionary dictionary];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(didFetchLocations:)
                                                      name:HSLocationsServiceDidFetchLocationsNotification
@@ -70,14 +70,14 @@ static NSString *CellIdentifier = @"Cell";
 {
     CGFloat offsetDelta = scrollView.contentSize.height - scrollView.contentOffset.y - scrollView.frame.size.height;
     if (_locations.count && offsetDelta  < 10) {
-        ;
         NSLog(@"%@ %s %d", self, __PRETTY_FUNCTION__, [_locationService fetchMoreAfter:_locations.lastObject]);
     }
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:[_locations[indexPath.row] name] message:nil delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
+    HSLocation *location = _locations[indexPath.row];
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:location.name message:nil delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
     [alertView show];
 }
 
@@ -87,7 +87,8 @@ static NSString *CellIdentifier = @"Cell";
 {
     _locations = _locationService.locations;
     [_locations enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        _locationByIndex[[obj guid]] = @(idx);
+        NSString *identifier = [obj guid];
+        _locationIdentifierByIndex[identifier] = @(idx);
     }];
     [self.tableView reloadData];
     self.title = [NSString stringWithFormat:@"%d Hotspots", _locations.count];
